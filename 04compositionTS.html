@@ -1,0 +1,161 @@
+
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        code{
+            background-color: rgba(0,0,0,.075);
+            font-weight: bold;
+        }
+        .subtitle{
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 0;
+            padding: 5px;
+            margin-top: 5px;
+            background-color: rgba(0,0,0,.075);
+            text-align: center;
+        }
+        h3{
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0;
+            padding: 5px;
+            margin-top: 10px;
+        }
+        .paragraph{
+            margin: 0.5rem 0 0.5rem;
+        }
+        .tab{
+            margin: 0 1rem;
+        }
+        html{
+            scroll-behavior: smooth;
+        }
+        </style>
+
+    <title>04 Composition using TS</title>
+  </head>
+  <body>
+      
+    <div class="container">
+        <h1 class="display-3 text-center">04 Composition using TS<hr></h1>
+        <header>
+            <p class="paragraph">
+                The last study was looking into a lot of things. I have been enamoured by the idea of composition over inheritance, but had not had any solid example on how to do it using JS, and more importantly TS for type support. After some grueling days of study and diving into the subject, I managed to find a quick an simple way to use composition over inheritance that works in TS and gives us the type support that we want. I prefer relying on TS inference to avoid human error, this gives us a looser structure, but overall helps with the possibility of errors. Typing directly adds to the possiblity of human error. Last time I found a way to get the best of both worlds. In JS there are plenty of options on how to do composition, I will implement and refine the TS way that I found to work best, starting from scratch to get a clean slate going. This method harnesses the power of <strong>closures</strong> to create truly private properties and methods, <strong>state</strong> management, and the use of <strong>__proto__</strong> to mimic class functionality and have our common methods in the same object, making the creation of objects more efficient by not having to create every method for every object individually. I will also attempt to create an interaction between objects using <strong>functional programming approach</strong> which is declarative and separates interaction between objects. 
+            </p>
+        </header>
+
+        <h2 id="00" class="subtitle">Index</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Topic</th>
+                    <th scope="col">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>
+                        <a href="#01">Intro</a>
+                    </td>
+                    <td>
+                        The esscence of Functional programming: Absence of side-effects
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <ul class="list-group">
+            <li class="list-group-item">
+                <a id="01" href="#00">Index</a>
+                <h2 class="subtitle">Starting Rules</h2>
+                <p class="paragraph">
+                    I will set a few rules for this endeavour. The first ones are regarding object creation: There is no use of the <em>new</em> keyword, or the <em>class</em> keyword. The second set of rules are regarding Functional Programming principles: The processing of data will be done with <em>pure functions</em> until the process that requires the change of the <em>state</em>. This means, that everything done outside an object will not alter the original data set, and when the data has been processed correctly, it will be processed by a method in an object that <em>sets the state</em> and resolves the changes to the original data set. For any practical use of programming, we need side-effects, they are what dictates what happens, however, the cleanest way to approach this is by separating the environment from the object, focusing on <em>WHAT</em> is happening and then resolving that in each object separately. 
+				</p>
+				<p class="paragraph">
+					I will create a mock-up of an RPG-ish game with interactions between two bands, heroes and enemies. I will begin by creating basic interactions between both and expand into a larger scenario. My initial idea is to have the environment separated form the heroes and enemies and process each action as a list of events with results that will be passed on to each object and alter the state.
+				</p>
+				<a id="02" href="#00">Index</a>
+				<h2 class="subtitle">Creating our Hero</h2>
+				<p class="paragraph">
+                    I started creating our FFn for our hero of tpye RedMage. I decided to work everything State related using clsoures, so I created the state of the RedMage  with name, class: 'Red Mage', and a stats object that has lvl, hp, str, mgc. I then created some methods to compose to RedMage: canGreet(), canGetStats(), canGetState(). These take the state as an arg and give RedMage the methods greet(), getStats(), and getState(). These are in a beta state.
+                </p>
+                <p class="paragraph">
+                    <strong>State</strong>
+                    <br>
+                    I didn't have the time to test what happened when you got the state inside a closure for an object. getState() returns the state in the closure so I started to test <code>const marlrusState = marlrus.getState()</code> which in fact stored the state. Then I did <code>marlrusState.stats.lvl = 200</code> and low and behold, when I used <code>marlrus.getStats()</code> the level was set to 200. I believe that this has to do with the way JS handles objects, instead of creating a new object it just becomes a pointer to the object in memory. I then tried to use the spread syntax <code>getState(state: any) { return {...state} }</code> which didn't work either. Then I tried Object.assign() and It didn't work either. So I did what MDN calls a deep-clone workaround <code>return JSON.parse(JSON.stringify(state))</code> which did work. I created a file <strong>utility.fns.ts</strong> to store this logic as <code>deepClone(obj: any) + {...}</code> which will deepclone any object I pass. This worked, now we have an unalterable state. 
+                </p>
+                <p class="paragraph">
+                    <strong>Creating our Monster</strong>
+                    <br>
+                    I created the base monster Slime, which also has a state with class: 'Slime' and the same stats in RedMage but with different values. And as of now slime canGetState() and canGetStats(). I created <code>const slime = Slime()</code> and it is all working perfectly. Now our Monster and our Hero both share common properties and methods through composition without using class and avoiding extensions. 
+                </p>
+                <a id="03" href="#00">Index</a>
+                <h2 class="subtitle">Starting with Interaction</h2>
+                <p class="paragraph">
+                    <strong>Attack() Method</strong>
+                    <br>
+                    I create a new method canAttack() which returns <code>attack(target: string){ return { str: state.stats.str, target }</code> which I think to use to interact with the environment. What do we want to happen when we attack? I want to get the strength of the attacker, compute some sort of RNG for the damage, and then compute that damage to the target. This has to happen in the environment and this has to affect the state of the enemy which will then be passed as the state in the closure after processing. I ended up creating more properties for the attack event object: name, event: 'attack', origin: monster|hero, str: target. I added the method to both RedMage and Slime. 
+                </p>
+                <p class="paragraph">
+                    <strong>processAttack() Function</strong>
+                    <br>
+                    The interaction was a bit tricky, due to the fact that the way I would usually understand this process would be through an OOP approach. Instead I want to separate the environment from the actual data that would be our monsters and heroes (Entities). I created a function <code>const processAttack = (event: BattleEvent) => {...}</code> Where battle event take in the return object from attack and process the logic to alter the state of our heroes or monsters. Inside this function we want to get the state of our entities and alter their state accordingly.
+                </p>
+                <p class="paragraph">
+                    <strong>Creating the new state</strong>
+                    We start by creating a new array with the state of our targeted entity(s) <code>target.map(target=> target.getState())</code> This will create a new array with the state of our targeted entity. Then we want to alter the state of the target(s) using the Battle Event. <code>.map(target => target.name === event.target ? {...target, stats: {hp: target.stats.hp - event.str }} : target</code> Here we will use the spread operator to merge the target state with the new reduced hp from the attack, if the target does not match, it will return the target. We iterate over every enitity in the array that was targeted to future proof possible attacks that affect every entity involved. Since we use map with target.getState() our new dataset is not affecting the original data set.
+                </p>
+                <p class="paragraph">
+                    <strong>Setting the new state</strong>
+                    <br>
+                    We have a new method for our getState(), but we need one to update the state. We merge these properties and rename canGetState() to <code>canManageState()</code> which has getState() and updateState(). <code>updateState(newState: any) { return merge(state, newState) }</code> takes a new state and then uses a <strong>lodash</strong> method merge, to due a truly deep object merge using two objects. I tried using vanilla JS and could't do it through spread operator or object assign, and lodash was really handy here: Lodash TS help  for merge says: <em>Recursively merges own and inherited enumerable properties of source objects into the destination object, skipping source properties that resolve to undefined. Array and plain object properties are merged recursively. Other objects and value types are overridden by assignment. Source objects are applied from left to right. Subsequent sources overwrite property assignments of previous sources.</em>
+                </p>
+                <p class="paragraph">
+                    <strong>Setting the state in our event</strong>
+                    <br>
+                    Now we iterate through our targeted entities array and update the state of each target <code>targets.map(target => target.updateState(...))</code> inside update state we use <code>newStates.find(state=> state.name === target.name)</code>which updates the state with the state in our newState array using the name as the target criteria. I created another utility fn that finds an item in an array by name, which I created for the interactivity added later, but refactored it in to this code. The method is the following <code>findByName = (arr: any[], name:string) => { ... }</code> and uses arr.find( ... ) to find the element. This will update the state to the new state. Noted, that this does a batch state update just like React does, by using Map we efectively temproarily create a new state array which we then pass to all the entities in our array to updateState()
+                </p>
+                <a id="04" href="#00">Index</a>
+                <h2 class="subtitle">Adding Interactivity</h2>
+                <p class="paragraph">
+                    In the index.html I created 3 buttons, 2 for our hero attacking presumably one of the two slimes, and one for the 2 slimes to attack back. The buttons have an <em>id</em> that matches the element we are targetting and a class of marlrus-att or slime-att to get them in the DOM. We get the elements, then we iterate over them and add an event listener for each of them. On the click event we run a function inside we <code>processAttack()</code> and get log in our console who wasd affected through getStats() For our hero we used <code>processAttack(marlrus.attack(button.id))</code> and we logged the stats of the targeted enemy with <code>findByName(monsters, button.id)!.getStats()</code> I created the same thing for our slimeButtons but switched the logic. <strong>Note:</strong> I don't remember if I specified that I set the heroes to an array and monsters to an array.
+                </p>
+                <p class="paragraph">
+                    <strong>More monsters?</strong>
+                    <br>
+                    I wanted to create monsters dynamically by calling the Slime() FFn, so I made a function <code>const createSlimes = (quantity: number) => { ... }</code> Inside we create a monsters [] and push one monster for everyone of our quanitity using a for loop <code>for(let i = quanitity; i > 0; i--){ ... }</code> inside we create our monsters and push them to the array <code>monsters.push(Slime(`Slime$[i}`))</code> which creates the slimes we want and finally we <code>return monsters</code>. this is what we call in our global monsters array. We could potentially set this to <code>createMonsters(FFn: Function, quantity: number))</code> which would make this more re-usable, however typing it is complicated. 
+                </p>
+                <p class="paragraph">
+                    Now we can dynamically create monsters, and use buttons to interact instead of using the console or hardcoding it. 
+                </p>
+                <a id="05" href="#00">Index</a>
+                <h2 class="subtitle">Typing</h2>
+                <p class="paragraph">
+                    Until now I have been using any on most of the methods. However I want to get TS type support. I went to all the methods that matter what the return is and used generics to set the type, and in some of the methods return. I created a <strong>interfaces.ts</strong> file to handle the interfaces I need to pass as calling a property using dot notation freaks TS as it doesn't know if the generic has that property to access. I created three interfaces <code>BaseState</code> which has all the things that we can expect from the base state of our RedMage and Slime, <code>PublicProps</code> which only has the name which is the pulic props in our created objects, and <code>BattleEvent</code> for the return type of our attack() method. After correctly typing everything we get amazing TS support mostly through inferrence in our code, which is exactly what we want.
+                </p>
+                <p class="paragraph">
+                    <strong>Notes and Conclusion</strong>
+                    I actually Typed this before finishing the code until now, but using HTML to write generics is a pain... It helped a lot to get proper TS inferrence and returns but it was great for debugging. A few workarounds were done, and a few ! had to be added, especially for anything that uses the .find() method because it might return null. However, we got our things done and we can extrapolate the results to know that we can definitely expand this idea and that we completed what we wanted form the start using functional programming which fel prety natural. I can safely say that doing this approach in vanilla JS is a lot easier, especially if you don't need type inferrence. TS was definitely not made for Functional Programming as its main intention, but it can be done prety well if the conditions to get inferrence are met. Overall I call this project a great success for something that was scrapped in a day and I wish to work in developing some form of interactive JS game in the future using these principles. For my first delve into doing something larger with Functional Programming I can safely say that it was much easier to debug and trobuleshoot than when I started OOP, especially since there is no inheritance and no processes that happen in the middle. I love the concept of separating logic from data, and will keep that principle in mind. This experiment flowed incredibly well, I didn't have to look at documentation as much as I expected, and I actually spent a lot of time just getting the environment going properly. I learned a lot from this and can see myself implementing this style in API development to a great degree. 
+                </p>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    </body>
+</html>
